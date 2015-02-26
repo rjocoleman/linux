@@ -11,3 +11,11 @@ config MMC_CLKGATE
 	  support handling this in order for it to be of any use.
 
 	  If unsure, say N.
+
+config MMC_LOCK
+	bool "MMC/SD password based card lock/unlock"
+	select KEYS
+	help
+	  This will add the ability to lock/unlock SD and MMC cards.
+
+	  If unsure, say N.
