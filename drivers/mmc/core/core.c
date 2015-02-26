@@ -2751,6 +2751,27 @@ static inline void mmc_unregister_key_type(void)
 	unregister_key_type(&key_type_mmc);
 }
 
+int mmc_unlock_card(struct mmc_card *card)
+{
+	int stat;
+	struct mmc_password password;
+
+	mmc_card_set_locked(card);
+	stat = mmc_get_password(card, &password);
+	if (stat) {
+		pr_warn("%s: Cannot find matching key\n",
+			mmc_hostname(card->host));
+		return stat;
+	}
+	stat = mmc_lock_unlock(card, &password, MMC_LOCK_MODE_UNLOCK);
+	if (stat)
+		pr_warn("%s: Password failed to unlock card\n",
+			mmc_hostname(card->host));
+	else
+		mmc_card_clear_locked(card);
+	return stat;
+}
+
 #else /* CONFIG_MMC_LOCK */
 
 int mmc_get_password(struct mmc_card *card, struct mmc_password *password)
@@ -2765,6 +2786,11 @@ static inline int mmc_register_key_type(void)
 
 static inline void mmc_unregister_key_type(void)
 {
+}
+
+int mmc_unlock_card(struct mmc_card *card)
+{
+	return -ENOKEY;
 }
 
 #endif /* CONFIG_MMC_LOCK */
